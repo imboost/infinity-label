@@ -528,7 +528,7 @@
 
         var objects = null;
 
-        setTimeout(function () {
+        // setTimeout(function () {
             objects = layer.children;
 
             objects.forEach(function (obj) {
@@ -562,7 +562,7 @@
                     };
 
                     $.ajax(settings).done(function (response) {
-                        console.log(response);
+                        console.log('dargmove', response);
                     });
                 });
 
@@ -615,11 +615,11 @@
                     };
 
                     $.ajax(settings).done(function (response) {
-                        console.log(response);
+                        console.log('transform',response);
                     });
                 });
             });
-        }, 3000);
+        // }, 3000);
 
         var label_merge = [];
 
