@@ -177,6 +177,8 @@
             return doc.documentElement.textContent;
         }
 
+        var objects = null;
+
         // Layout configuration from file read expressjs
         var design_string = "<%= design %>";
 
@@ -213,6 +215,7 @@
             });
 
             layer.add(Label);
+
             layer.draw();
         }
 
@@ -227,7 +230,6 @@
 
         // Transformer
         var transformer = new Konva.Transformer();
-        layer.add(transformer);
 
         // Transformer Attach Shape
         var selectedShape = null;
@@ -253,6 +255,13 @@
 
         if (design[0].label.length != 0) {
             for (var i = 0; i < design[0].label.length; i++) {
+                $(document).find('#component-list').append(`<li class="nav-item">
+                                                                <a href="javascript:void(0)" class="nav-link">
+                                                                    <i class="nav-icon fa fa-circle"></i>
+                                                                    <p>`+ design[0].label[i].name + `</p>
+                                                                </a>
+                                                            </li>`);
+
                 if (design[0].label[i].type === "text") {
                     var text = new Konva.Text({
                         x: design[0].label[i].x,
@@ -265,6 +274,96 @@
                     });
 
                     layer.add(text);
+
+                    text.on('dragmove', function () {
+                        var containerPosition = this.getAbsolutePosition();
+                        var stageBox = stage.container().getBoundingClientRect();
+
+                        var areaPosition = {
+                            x: containerPosition.x,
+                            y: containerPosition.y,
+                        };
+
+                        for (let i = 0; i < design[0].label.length; i++) {
+                            if (design[0].label[i].name === this.attrs.name) {
+                                design[0].label[i].x = areaPosition.x;
+                                design[0].label[i].y = areaPosition.y;
+                                break; // Stop once the label is found and updated
+                            }
+                        }
+
+                        var data = JSON.stringify(design);
+
+                        var settings = {
+                            "url": "http://localhost:3000/design_update",
+                            "method": "POST",
+                            "timeout": 0,
+                            "headers": {
+                                "Content-Type": "text/plain"
+                            },
+                            "data": data,
+                        };
+
+                        $.ajax(settings).done(function (response) {
+                            console.log(response);
+                        });
+                    });
+
+                    text.on('dragend', function () {
+                        var data = JSON.stringify(design);
+
+                        var settings = {
+                            "url": "http://localhost:3000/design_update",
+                            "method": "POST",
+                            "timeout": 0,
+                            "headers": {
+                                "Content-Type": "text/plain"
+                            },
+                            "data": data
+                        };
+
+                        $.ajax(settings).done(function (response) {
+                            console.log(response);
+                        });
+                    });
+
+                    text.on('transform', function () {
+                        var containerPosition = this.getAbsolutePosition();
+                        var stageBox = stage.container().getBoundingClientRect();
+
+                        var areaPosition = {
+                            x: containerPosition.x,
+                            y: containerPosition.y,
+                        };
+
+                        var scaleX = this.scaleX();
+                        var scaleY = this.scaleY();
+                        var originalFontSize = this.fontSize();
+                        var scaledFontSize = originalFontSize * Math.max(scaleX, scaleY);
+
+                        for (let i = 0; i < design[0].label.length; i++) {
+                            if (design[0].label[i].name === this.attrs.name) {
+                                design[0].label[i].fontSize = scaledFontSize;
+                                break; // Stop once the label is found and updated
+                            }
+                        }
+
+                        var data = JSON.stringify(design);
+
+                        var settings = {
+                            "url": "http://localhost:3000/design_update",
+                            "method": "POST",
+                            "timeout": 0,
+                            "headers": {
+                                "Content-Type": "text/plain"
+                            },
+                            "data": data,
+                        };
+
+                        $.ajax(settings).done(function (response) {
+                            console.log(response);
+                        });
+                    });
                 }
 
                 if (design[0].label[i].type === "qr") {
@@ -288,118 +387,101 @@
                         });
 
                         layer.add(qr);
-                    };
+
+                        qr.on('dragmove', function () {
+                            var containerPosition = this.getAbsolutePosition();
+                            var stageBox = stage.container().getBoundingClientRect();
+
+                            var areaPosition = {
+                                x: containerPosition.x,
+                                y: containerPosition.y,
+                            };
+
+                            for (let i = 0; i < design[0].label.length; i++) {
+                                if (design[0].label[i].name === this.attrs.name) {
+                                    design[0].label[i].x = areaPosition.x;
+                                    design[0].label[i].y = areaPosition.y;
+                                    break; // Stop once the label is found and updated
+                                }
+                            }
+
+                            var data = JSON.stringify(design);
+
+                            var settings = {
+                                "url": "http://localhost:3000/design_update",
+                                "method": "POST",
+                                "timeout": 0,
+                                "headers": {
+                                    "Content-Type": "text/plain"
+                                },
+                                "data": data,
+                            };
+
+                            $.ajax(settings).done(function (response) {
+                                console.log(response);
+                            });
+                        });
+
+                        qr.on('dragend', function () {
+                            var data = JSON.stringify(design);
+
+                            var settings = {
+                                "url": "http://localhost:3000/design_update",
+                                "method": "POST",
+                                "timeout": 0,
+                                "headers": {
+                                    "Content-Type": "text/plain"
+                                },
+                                "data": data
+                            };
+
+                            $.ajax(settings).done(function (response) {
+                                console.log(response);
+                            });
+                        });
+
+                        qr.on('transform', function () {
+                            var containerPosition = this.getAbsolutePosition();
+                            var stageBox = stage.container().getBoundingClientRect();
+
+                            var areaPosition = {
+                                x: containerPosition.x,
+                                y: containerPosition.y,
+                            };
+
+                            var width_new = this.width() * (this.scaleX());
+                            var height_new = this.height() * (this.scaleY());
+
+                            for (let i = 0; i < design[0].label.length; i++) {
+                                if (design[0].label[i].name === this.attrs.name) {
+                                    design[0].label[i].width = width_new.toFixed(0);
+                                    design[0].label[i].height = height_new.toFixed(0);
+                                    break; // Stop once the label is found and updated
+                                }
+                            }
+
+                            var data = JSON.stringify(design);
+
+                            var settings = {
+                                "url": "http://localhost:3000/design_update",
+                                "method": "POST",
+                                "timeout": 0,
+                                "headers": {
+                                    "Content-Type": "text/plain"
+                                },
+                                "data": data,
+                            };
+
+                            $.ajax(settings).done(function (response) {
+                                console.log(response);
+                            });
+                        });
+                    }
                     imageObj.src = design[0].label[i].text;
                 }
-
-                $(document).find('#component-list').append(`<li class="nav-item">
-                                                                <a href="javascript:void(0)" class="nav-link">
-                                                                    <i class="nav-icon fa fa-circle"></i>
-                                                                    <p>`+ design[0].label[i].name + `</p>
-                                                                </a>
-                                                            </li>`);
-                
-                // if (i === (design[0].label.length-1)) {
-                //     console.log(i, design[0].label.length);
-                //     objects = layer.children;
-                //     console.log(objects);
-
-                //     objects.forEach(function (obj) {
-                //         obj.on('dragmove', function () {
-                //             var containerPosition = obj.getAbsolutePosition();
-                //             var stageBox = stage.container().getBoundingClientRect();
-                //             console.log('tipe',obj.attrs.type);
-
-                //             var areaPosition = {
-                //                 x: containerPosition.x,
-                //                 y: containerPosition.y,
-                //             };
-
-                //             for (let i = 0; i < design[0].label.length; i++) {
-                //                 if (design[0].label[i].name === obj.attrs.name) {
-                //                     design[0].label[i].x = areaPosition.x;
-                //                     design[0].label[i].y = areaPosition.y;
-                //                     break; // Stop once the label is found and updated
-                //                 }
-                //             }
-
-                //             var data = JSON.stringify(design);
-
-                //             var settings = {
-                //                 "url": "http://localhost:3000/design_update",
-                //                 "method": "POST",
-                //                 "timeout": 0,
-                //                 "headers": {
-                //                     "Content-Type": "text/plain"
-                //                 },
-                //                 "data": data,
-                //             };
-
-                //             $.ajax(settings).done(function (response) {
-                //                 console.log('dargmove', response);
-                //             });
-                //         });
-
-                //         obj.on('transform', function () {
-                //             var containerPosition = obj.getAbsolutePosition();
-                //             var stageBox = stage.container().getBoundingClientRect();
-                //             ;
-                //             var areaPosition = {
-                //                 x: containerPosition.x,
-                //                 y: containerPosition.y,
-                //             };
-
-                //             var width_new = obj.width() * (obj.scaleX());
-                //             var height_new = obj.height() * (obj.scaleY());
-
-                //             console.log('tipe',obj.attrs.type)
-                //             if (obj.attrs.type === "text") {
-                //                 var scaleX = obj.scaleX();
-                //                 var scaleY = obj.scaleY();
-                //                 var originalFontSize = obj.fontSize();
-                //                 var scaledFontSize = originalFontSize * Math.max(scaleX, scaleY);
-
-                //                 for (let i = 0; i < design[0].label.length; i++) {
-                //                     if (design[0].label[i].name === obj.attrs.name) {
-                //                         design[0].label[i].fontSize = scaledFontSize;
-                //                         break; // Stop once the label is found and updated
-                //                     }
-                //                 }
-                //             }
-
-                //             if (obj.attrs.type === "qr") {
-                //                 for (let i = 0; i < design[0].label.length; i++) {
-                //                     if (design[0].label[i].name === obj.attrs.name) {
-                //                         design[0].label[i].width = width_new.toFixed(0);
-                //                         design[0].label[i].height = height_new.toFixed(0);
-                //                         break; // Stop once the label is found and updated
-                //                     }
-                //                 }
-                //             }
-
-                //             var data = JSON.stringify(design);
-
-                //             var settings = {
-                //                 "url": "http://localhost:3000/design_update",
-                //                 "method": "POST",
-                //                 "timeout": 0,
-                //                 "headers": {
-                //                     "Content-Type": "text/plain"
-                //                 },
-                //                 "data": data,
-                //             };
-
-                //             $.ajax(settings).done(function (response) {
-                //                 console.log('transform',response);
-                //             });
-                //         });
-                //     });
-                // }
-            
             }
-            layer.draw();
 
-           
+            layer.draw();
         }
 
         var component_name = "";
@@ -626,120 +708,6 @@
             });
         });
 
-        var objects = null;
-
-        setTimeout(function () {
-            objects = layer.children;
-
-            objects.forEach(function (obj) {
-                obj.on('dragmove', function () {
-                    var containerPosition = obj.getAbsolutePosition();
-                    var stageBox = stage.container().getBoundingClientRect();
-
-                    var areaPosition = {
-                        x: containerPosition.x,
-                        y: containerPosition.y,
-                    };
-
-                    for (let i = 0; i < design[0].label.length; i++) {
-                        if (design[0].label[i].name === obj.attrs.name) {
-                            design[0].label[i].x = areaPosition.x;
-                            design[0].label[i].y = areaPosition.y;
-                            break; // Stop once the label is found and updated
-                        }
-                    }
-
-                    // var data = JSON.stringify(design);
-
-                    // var settings = {
-                    //     "url": "http://localhost:3000/design_update",
-                    //     "method": "POST",
-                    //     "timeout": 0,
-                    //     "headers": {
-                    //         "Content-Type": "text/plain"
-                    //     },
-                    //     "data": data,
-                    // };
-
-                    // $.ajax(settings).done(function (response) {
-                    //     console.log('dargmove', response);
-                    // });
-                });
-
-                obj.on('dragend', function () {
-                    layer.draw();
-
-                    var data = JSON.stringify(design);
-                    var settings = {
-                        "url": "http://localhost:3000/design_update",
-                        "method": "POST",
-                        "timeout": 0,
-                        "headers": {
-                            "Content-Type": "text/plain"
-                        },
-                        "data": data,
-                    };
-
-                    $.ajax(settings).done(function (response) {
-                        console.log('dragend', response);
-                    });
-                });
-
-                obj.on('transform', function () {
-                    var containerPosition = obj.getAbsolutePosition();
-                    var stageBox = stage.container().getBoundingClientRect();
-
-                    var areaPosition = {
-                        x: containerPosition.x,
-                        y: containerPosition.y,
-                    };
-
-                    var width_new = obj.width() * (obj.scaleX());
-                    var height_new = obj.height() * (obj.scaleY());
-
-                    if (obj.attrs.type === "text") {
-                        var scaleX = obj.scaleX();
-                        var scaleY = obj.scaleY();
-                        var originalFontSize = obj.fontSize();
-                        var scaledFontSize = originalFontSize * Math.max(scaleX, scaleY);
-
-                        for (let i = 0; i < design[0].label.length; i++) {
-                            if (design[0].label[i].name === obj.attrs.name) {
-                                design[0].label[i].fontSize = scaledFontSize;
-                                break; // Stop once the label is found and updated
-                            }
-                        }
-                    }
-
-                    if (obj.attrs.type === "qr") {
-                        for (let i = 0; i < design[0].label.length; i++) {
-                            if (design[0].label[i].name === obj.attrs.name) {
-                                design[0].label[i].width = width_new.toFixed(0);
-                                design[0].label[i].height = height_new.toFixed(0);
-                                break; // Stop once the label is found and updated
-                            }
-                        }
-                    }
-
-                    var data = JSON.stringify(design);
-
-                    var settings = {
-                        "url": "http://localhost:3000/design_update",
-                        "method": "POST",
-                        "timeout": 0,
-                        "headers": {
-                            "Content-Type": "text/plain"
-                        },
-                        "data": data,
-                    };
-
-                    $.ajax(settings).done(function (response) {
-                        console.log('transform',response);
-                    });
-                });
-            });
-        }, 3000);
-
         var label_merge = [];
 
         function updateTemplateWithInput(inputData, template) {
@@ -932,11 +900,6 @@
         $(document).on('click', '#btn-delete-component', function (event) {
             event.preventDefault();
 
-            // if (!selectedShape) {
-            //     alert('Please select a component to delete');
-            //     return;
-            // }
-
             var componentName = selectedShape.name();
             var deleteConfirmed = confirm('Remove this compoenent "' + componentName + '" ?');
             var fileName = design[0].file.name;
@@ -984,7 +947,7 @@
                                                                 </a>
                                                             </li>`);
                         }
-                        
+
                     });
                 }
             }

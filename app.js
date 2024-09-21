@@ -19,26 +19,12 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 app.use(
     helmet({
-        // contentSecurityPolicy: {
-        //     directives: {
-        //         defaultSrc: ["*"],
-        //         scriptSrc: ["* 'unsafe-inline' 'unsafe-eval'"],
-        //         connectSrc: ["*"],
-        //         imgSrc: ["*"],
-        //         styleSrc: ["* 'unsafe-inline'"],
-        //         fontSrc: ["*"],
-        //         objectSrc: ["*"],
-        //         mediaSrc: ["*"],
-        //         frameSrc: ["*"]
-        //     },
-        // },
         contentSecurityPolicy: {
             directives: {
                 defaultSrc: ["'self'", "'unsafe-inline'"],
                 styleSrc: ["* 'unsafe-inline'"],
                 scriptSrc: ["* 'unsafe-inline' 'unsafe-eval'"],
                 imgSrc: ["'self'", "data:", "'unsafe-inline'"],
-                // fontSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "data:"],
                 fontSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "data:", "*"],
                 connectSrc: ["*"],
                 frameSrc: ["'self'"],
