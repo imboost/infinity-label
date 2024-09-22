@@ -135,6 +135,10 @@
         <aside class="control-sidebar control-sidebar-dark"></aside>
     </div>
 
+    <footer class="main-footer">
+        <a href="https://cvikb.com">CV Infinity Karya Bersama</a>
+    </footer>
+
     <div class="modal fade" id="new-project" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" style="display: flex; align-items: center; justify-content: center; height: 100vh;">
             <div class="modal-content">
@@ -205,9 +209,9 @@
             var height = $(document).find('#height').val();
             var width = $(document).find('#width').val();
 
-            if (height === '' || height === ' ' || height === '0' ||
-                width === '' || width === ' ' || width === '0' ||
-                projectName === '' || projectName === ' ' || projectName === '0'
+            if (height === '' || height === ' ' || height === '0' || height === '-' ||
+                width === '' || width === ' ' || width === '0' || width === '-' ||
+                projectName === '' || projectName === ' ' || projectName === '0' || projectName === '-'
             ) {
                 $(document).find('#btn-create').attr('disabled', 'disabled');
             } else {
@@ -216,7 +220,7 @@
         });
 
         $(document).on('keyup', '#height', function () {
-            projectName = $(this).val();
+            projectName = $('#project-name').val();
             fileName = projectName.toLowerCase();
             fileName = fileName.replace(/ /g, '_');
             fileName = fileName + ".json";
@@ -224,9 +228,9 @@
             var height = $(document).find('#height').val();
             var width = $(document).find('#width').val();
 
-            if (height === '' || height === ' ' || height === '0' ||
-                width === '' || width === ' ' || width === '0' ||
-                projectName === '' || projectName === ' ' || projectName === '0'
+            if (height === '' || height === ' ' || height === '0' || height === '-' ||
+                width === '' || width === ' ' || width === '0' || width === '-' ||
+                projectName === '' || projectName === ' ' || projectName === '0' || projectName === '-'
             ) {
                 $(document).find('#btn-create').attr('disabled', 'disabled');
             } else {
@@ -235,7 +239,7 @@
         });
 
         $(document).on('keyup', '#width', function () {
-            projectName = $(this).val();
+            projectName = $('#project-name').val();
             fileName = projectName.toLowerCase();
             fileName = fileName.replace(/ /g, '_');
             fileName = fileName + ".json";
@@ -243,9 +247,9 @@
             var height = $(document).find('#height').val();
             var width = $(document).find('#width').val();
 
-            if (height === '' || height === ' ' || height === '0' ||
-                width === '' || width === ' ' || width === '0' ||
-                projectName === '' || projectName === ' ' || projectName === '0'
+            if (height === '' || height === ' ' || height === '0' || height === '-' ||
+                width === '' || width === ' ' || width === '0' || width === '-' ||
+                projectName === '' || projectName === ' ' || projectName === '0' || projectName === '-'
             ) {
                 $(document).find('#btn-create').attr('disabled', 'disabled');
             } else {
@@ -265,9 +269,9 @@
                 $(document).find('#width').val(size[1]);
             }
 
-            if (height === '' || height === ' ' || height === '0' ||
-                width === '' || width === ' ' || width === '0' ||
-                projectName === '' || projectName === ' ' || projectName === '0'
+            if (height === '' || height === ' ' || height === '0' || height === '-' ||
+                width === '' || width === ' ' || width === '0' || width === '-' ||
+                projectName === '' || projectName === ' ' || projectName === '0' || projectName === '-'
             ) {
                 $(document).find('#btn-create').attr('disabled', 'disabled');
             } else {
@@ -286,6 +290,12 @@
                     "height": height,
                     "width": width
                 },
+                "cloud": {
+                    "token": "-",
+                    "project": "-",
+                    "collection": "-",
+                    "appid": "-"
+                },
                 "label": []
             }];
 
@@ -300,8 +310,6 @@
             };
 
             $.ajax(settings).done(function (response) {
-                console.log(response);
-
                 if (response.type === 1) {
                     window.location.replace('editor/' + fileName);
                 }
