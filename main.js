@@ -12,8 +12,11 @@ function createWindow() {
         width: 1080,
         height: 600,
         title: "Infinity Label",
+        icon: 'public/adminlte/img/logo.png',
         webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
+            allowRunningInsecureContent: true,
+            webSecurity: false
         }
     });
 
