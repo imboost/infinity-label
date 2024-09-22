@@ -12,6 +12,9 @@
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <link rel="stylesheet" href="../plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="../plugins/toastr/toastr.min.css" />
+    <link rel="stylesheet" href="../plugins/jsgrid/jsgrid.min.css" />
+    <link rel="stylesheet" href="../plugins/jsgrid/jsgrid-theme.min.css" />
     <link rel="stylesheet" href="../adminlte/css/adminlte.min.css">
     <link rel="stylesheet" href="../fontaswome/css/all.min.css">
     <script src="../konva.js"></script>
@@ -64,18 +67,6 @@
             </a>
 
             <div class="sidebar">
-                <!-- SidebarSearch Form -->
-                <!-- <div class="form-inline mt-2">
-                    <div class="input-group" data-widget="sidebar-search">
-                        <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
-                        <div class="input-group-append">
-                            <button class="btn btn-sidebar">
-                                <i class="fas fa-search fa-fw"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div> -->
-
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false" id="component-list"></ul>
                 </nav>
@@ -155,10 +146,28 @@
         </div>
     </div>
 
-    <div class="modal fade modal-xl"></div>
+    <div class="modal fade bd-example-modal-xl" tabindex="-1" role="dialog" aria-labelledby="modal-data-viewer" aria-hidden="true" id="modal-data-viewer">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="card m-0 p-0 no-shadow">
+                    <div class="card-header">
+                        <strong>Data Loaded</strong>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="data-viewer"></div>
+                    </div>
+                    <div class="card-footer">
+                        <a class="btn btn-primary btn-block" id="btn-print-all">Print All</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="../plugins/jquery/jquery.min.js"></script>
     <script src="../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../plugins/toastr/toastr.min.js"></script>
+    <script src="../plugins/jsgrid/jsgrid.min.js"></script>
     <script src="../adminlte/js/adminlte.min.js"></script>
 
     <script>
@@ -323,7 +332,7 @@
                         };
 
                         $.ajax(settings).done(function (response) {
-                            console.log(response);
+                            // console.log(response);
                         });
                     });
 
@@ -361,7 +370,7 @@
                         };
 
                         $.ajax(settings).done(function (response) {
-                            console.log(response);
+                            // console.log(response);
                         });
                     });
                 }
@@ -418,7 +427,7 @@
                             };
 
                             $.ajax(settings).done(function (response) {
-                                console.log(response);
+                                // console.log(response);
                             });
                         });
 
@@ -436,7 +445,7 @@
                             };
 
                             $.ajax(settings).done(function (response) {
-                                console.log(response);
+                                // console.log(response);
                             });
                         });
 
@@ -473,7 +482,7 @@
                             };
 
                             $.ajax(settings).done(function (response) {
-                                console.log(response);
+                                // console.log(response);
                             });
                         });
                     }
@@ -695,6 +704,7 @@
          */
 
         var label_merge = [];
+        var excel_data = null;
 
         function updateTemplateWithInput(inputData, template) {
             // Create a new object based on the template to avoid mutating the original template
@@ -726,6 +736,7 @@
 
                 reader.onload = function (e) {
                     const arrayBuffer = e.target.result;
+
                     // Read Excel
                     const workbook = XLSX.read(arrayBuffer, { type: 'array' });
 
@@ -735,6 +746,7 @@
 
                     // Sheet to JSON
                     const data = XLSX.utils.sheet_to_json(worksheet);
+                    excel_data = XLSX.utils.sheet_to_json(worksheet);
 
                     // Merge data to label component
                     for (var i = 0; i < data.length; i++) {
@@ -774,17 +786,57 @@
                             }
                         }
                     }
-                };
+                }
+
+                reader.onloadend = function (e) {
+                    toastr.success('Data Loaded!');
+
+                    if (design[0].label.length != 0) {
+                        var data_column_name = [];
+
+                        for (var i = 0; i < design[0].label.length; i++) {
+                            data_column_name.push(
+                                {
+                                    name: design[0].label[i].name,
+                                    type: "text",
+                                    title: design[0].label[i].name
+                                }
+                            );
+                        }
+                    }
+
+                    $("#data-viewer").jsGrid({
+                        width: "100%",
+
+                        sorting: true,
+                        paging: true,
+                        pageSize: 10,
+
+                        data: excel_data,
+
+                        fields: data_column_name
+                    });
+
+                    $(document).find('#modal-data-viewer').modal('show');
+                }
 
                 reader.readAsArrayBuffer(file);
             });
         });
 
         $(document).on('click', '#btn-print', function () {
+            if (label_merge.length === 0) {
+                toastr.error('Choose Excel File!');
+            } else {
+                $(document).find('#modal-data-viewer').modal('show');
+            }
+        });
+
+        $(document).on('click', '#btn-print-all', function () {
             var width_section = $(document).find('#content').width() - 10;
 
             if (label_merge.length === 0) {
-                alert('Choose Excel Data Before Print!');
+                toastr.error('Choose Excel File!');
             } else {
                 for (var i = 0; i < label_merge.length; i++) {
                     layer.clear();
@@ -854,6 +906,10 @@
             }
         });
 
+        /**
+         * Save to PNG
+         */
+
         $(document).on('click', '#btn-save-png', function () {
             var width = Number(design[0].file.width);
             var height = Number(design[0].file.height);
@@ -879,15 +935,19 @@
             };
 
             $.ajax(settings).done(function (response) {
-                console.log(response);
+                // console.log(response);
             });
         });
+
+        /**
+         * Remove Component (Bug Input Can't Type After Remove)
+         */
 
         $(document).on('click', '#btn-delete-component', function (event) {
             event.preventDefault();
 
             var componentName = selectedShape.name();
-            var deleteConfirmed = confirm('Remove this compoenent "' + componentName + '" ?');
+            var deleteConfirmed = confirm('Remove this component "' + componentName + '" ?');
             var fileName = design[0].file.name;
 
             if (deleteConfirmed) {
@@ -897,18 +957,18 @@
                         for (var i = 0; i < design[0].label.length; i++) {
                             if (design[0].label[i].name === componentName) {
                                 design[0].label.splice(i, 1);
-                                // console.log(componentName + ' Removed!');
+                                toastr.error(componentName + ' Removed!');
                                 break;
                             }
                         }
                     }
 
                     // Component detach
+                    selectedShape = null;
                     shape.destroy();
                     transformer.detach();
-                    layer.draw();
 
-                    selectedShape = null;
+                    layer.draw();
 
                     var data = JSON.stringify(design);
 
@@ -923,8 +983,10 @@
                     };
 
                     $(document).find('#component-list').html('');
+
                     $.ajax(settings).done(function (response) {
-                        console.log(response);
+                        $('#btn-delete-component').hide();
+
                         for (var i = 0; i < design[0].label.length; i++) {
                             $(document).find('#component-list').append(`<li class="nav-item">
                                                                 <a href="javascript:void(0)" class="nav-link">
@@ -933,7 +995,6 @@
                                                                 </a>
                                                             </li>`);
                         }
-
                     });
                 }
             }
