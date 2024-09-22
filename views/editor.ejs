@@ -832,78 +832,93 @@
             }
         });
 
-        $(document).on('click', '#btn-print-all', function () {
-            var width_section = $(document).find('#content').width() - 10;
+        function data_to_design(i) {
+            console.log(i);
 
-            if (label_merge.length === 0) {
-                toastr.error('Choose Excel File!');
-            } else {
-                for (var i = 0; i < label_merge.length; i++) {
-                    layer.clear();
+            layer.clear();
 
-                    var design = JSON.parse(decodedDesign.slice(1, -1));
-                    var width = Number(design[0].file.width);
-                    var height = Number(design[0].file.height);
+            var design = JSON.parse(decodedDesign.slice(1, -1));
+            var width = Number(design[0].file.width);
+            var height = Number(design[0].file.height);
 
-                    let centerX = stage.width() / 2;
-                    let centerY = stage.height() / 2;
+            let centerX = stage.width() / 2;
+            let centerY = stage.height() / 2;
 
-                    var Label = new Konva.Rect({
-                        x: centerX - (parseFloat(width) * 3.7795275591),
-                        y: centerY - (parseFloat(height) * 3.7795275591),
-                        width: parseFloat(width) * 3.7795275591, //konversi mm ke px
-                        height: parseFloat(height) * 3.7795275591,
-                        fill: 'white',
-                        stroke: 'lightgray',
-                        strokeWidth: 1,
-                        name: 'base_layout'
+            var Label = new Konva.Rect({
+                x: centerX - (parseFloat(width) * 3.7795275591),
+                y: centerY - (parseFloat(height) * 3.7795275591),
+                width: parseFloat(width) * 3.7795275591, //konversi mm ke px
+                height: parseFloat(height) * 3.7795275591,
+                fill: 'white',
+                stroke: 'lightgray',
+                strokeWidth: 1,
+                name: 'base_layout'
+            });
+
+            layer.add(Label);
+            layer.draw();
+
+            for (var j = 0; j < label_merge[i].length; j++) {
+                if (label_merge[i][j].type === "text") {
+                    var text = new Konva.Text({
+                        x: label_merge[i][j].x,
+                        y: label_merge[i][j].y,
+                        text: label_merge[i][j].text,
+                        fontSize: label_merge[i][j].fontSize,
+                        draggable: false,
+                        name: label_merge[i][j].name,
+                        type: "text"
                     });
 
-                    layer.add(Label);
-                    layer.draw();
+                    layer.add(text);
+                }
 
-                    for (var j = 0; j < label_merge[i].length; j++) {
-                        if (label_merge[i][j].type === "text") {
-                            var text = new Konva.Text({
-                                x: label_merge[i][j].x,
-                                y: label_merge[i][j].y,
-                                text: label_merge[i][j].text,
-                                fontSize: label_merge[i][j].fontSize,
-                                draggable: false,
-                                name: label_merge[i][j].name,
-                                type: "text"
-                            });
+                if (label_merge[i][j].type === "qr") {
+                    var x = label_merge[i][j].x;
+                    var y = label_merge[i][j].y;
+                    var height = Number(label_merge[i][j].height);
+                    var width = Number(label_merge[i][j].width);
+                    var name = label_merge[i][j].name;
 
-                            layer.add(text);
-                        }
+                    var imageObj = new Image();
+                    imageObj.onload = function () {
+                        var qr = new Konva.Image({
+                            x: x,
+                            y: y,
+                            image: imageObj,
+                            width: width,
+                            height: height,
+                            draggable: true,
+                            name: name,
+                            type: "qr"
+                        });
 
-                        if (label_merge[i][j].type === "qr") {
-                            var x = label_merge[i][j].x;
-                            var y = label_merge[i][j].y;
-                            var height = Number(label_merge[i][j].height);
-                            var width = Number(label_merge[i][j].width);
-                            var name = label_merge[i][j].name;
-
-                            var imageObj = new Image();
-                            imageObj.onload = function () {
-                                var qr = new Konva.Image({
-                                    x: x,
-                                    y: y,
-                                    image: imageObj,
-                                    width: width,
-                                    height: height,
-                                    draggable: true,
-                                    name: name,
-                                    type: "qr"
-                                });
-
-                                layer.add(qr);
-                            };
-                            imageObj.src = label_merge[i][j].text;
-                        }
-                    }
+                        layer.add(qr);
+                    };
+                    imageObj.src = label_merge[i][j].text;
                 }
             }
+
+            i = i + 1;
+            if (i < label_merge.length - 1) {
+                setTimeout(function () {
+                    data_to_design(i);
+                }, 1000);
+            }
+        }
+
+        $(document).on('click', '#btn-print-all', function () {
+            $(document).find('#modal-data-viewer').modal('hide');
+
+            setTimeout(function () {
+                if (label_merge.length === 0) {
+                    toastr.error('Choose Excel File!');
+                } else {
+                    var i = 0;
+
+                    data_to_design(i);
+                }
+            }, 3000);
         });
 
         /**
