@@ -113,7 +113,7 @@
                     </div>
                     <div class="mb-3 w-100">
                         <label for="component-attribute" class="form-label">Data Attribute</label>
-                        <input class="form-control width-auto" id="component-attribute" autocomplete="off" type="text">
+                        <input class="form-control width-auto" id="component-attribute" autocomplete="off" type="text" disabled>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -144,7 +144,7 @@
                     </div>
                     <div class="mb-3 w-100">
                         <label for="qr-component-attribute" class="form-label">Data Attribute</label>
-                        <input class="form-control width-auto" id="qr-component-attribute" autocomplete="off" type="text">
+                        <input class="form-control width-auto" id="qr-component-attribute" autocomplete="off" type="text" disabled>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -210,7 +210,10 @@
             layer.draw();
         }
 
-        // Mouse Cursor
+        /**
+         * Mouse Handler
+         */
+
         layer.on('mouseover', function (evt) {
             document.body.style.cursor = 'pointer';
         });
@@ -219,10 +222,12 @@
             document.body.style.cursor = 'default';
         });
 
-        // Transformer
+        /**
+         * Transformer & Attach Shape
+         */
+
         var transformer = new Konva.Transformer();
 
-        // Transformer Attach Shape
         var selectedShape = null;
         layer.on('click tap', function (evt) {
             transformer.destroy();
@@ -243,6 +248,10 @@
                 $('#btn-delete-component').hide();
             }
         });
+
+        /**
+         * Load Component
+         */
 
         if (design[0].label.length != 0) {
             for (var i = 0; i < design[0].label.length; i++) {
@@ -296,7 +305,7 @@
                         };
 
                         $.ajax(settings).done(function (response) {
-                            console.log(response);
+                            // console.log(response);
                         });
                     });
 
@@ -475,6 +484,10 @@
             layer.draw();
         }
 
+        /**
+         * Add Text
+         */
+
         var component_name = "";
         var component_text = "";
         var component_attribute = "";
@@ -483,8 +496,10 @@
             component_name = $(this).val();
             component_name = component_name.toLowerCase();
             component_name = component_name.replace(/ /g, '_');
+            component_attribute = component_name.replace(/ /g, '_');
 
             $(this).val(component_name);
+            $(document).find('#component-attribute').val(component_attribute);
 
             component_text = $(document).find('#component-text').val();
             component_attribute = $(document).find('#component-attribute').val();
@@ -503,21 +518,6 @@
 
             component_name = $(document).find('#component-name').val();
             component_attribute = $(document).find('#component-attribute').val();
-
-            if (component_name === "" || component_name === " " ||
-                component_text === "" || component_text === " " ||
-                component_attribute === "" || component_attribute === "") {
-                $(document).find('#btn-add-text').attr('disabled', 'disabled');
-            } else {
-                $(document).find('#btn-add-text').removeAttr('disabled');
-            }
-        });
-
-        $(document).on('keyup', '#component-attribute', function () {
-            component_attribute = $(this).val();
-
-            component_name = $(document).find('#component-name').val();
-            component_text = $(document).find('#component-text').val();
 
             if (component_name === "" || component_name === " " ||
                 component_text === "" || component_text === " " ||
@@ -573,6 +573,10 @@
             layer.draw();
         });
 
+        /**
+         * Add QR
+         */
+
         var qr_component_name = "";
         var qr_component_text = "";
         var qr_component_attribute = "";
@@ -581,8 +585,10 @@
             qr_component_name = $(this).val();
             qr_component_name = qr_component_name.toLowerCase();
             qr_component_name = qr_component_name.replace(/ /g, '_');
+            qr_component_attribute = qr_component_name.replace(/ /g, '_');
 
             $(this).val(qr_component_name);
+            $(document).find('#qr-component-attribute').val(qr_component_attribute);
 
             qr_component_text = $(document).find('#qr-component-text').val();
             qr_component_attribute = $(document).find('#qr-component-attribute').val();
@@ -601,21 +607,6 @@
 
             qr_component_name = $(document).find('#qr-component-name').val();
             qr_component_attribute = $(document).find('#qr-component-attribute').val();
-
-            if (qr_component_name === "" || qr_component_name === " " ||
-                qr_component_text === "" || qr_component_text === " " ||
-                qr_component_attribute === "" || qr_component_attribute === "") {
-                $(document).find('#btn-add-qr').attr('disabled', 'disabled');
-            } else {
-                $(document).find('#btn-add-qr').removeAttr('disabled');
-            }
-        });
-
-        $(document).on('keyup', '#qr-component-attribute', function () {
-            qr_component_attribute = $(this).val();
-
-            qr_component_name = $(document).find('#qr-component-name').val();
-            qr_component_text = $(document).find('#qr-component-text').val();
 
             if (qr_component_name === "" || qr_component_name === " " ||
                 qr_component_text === "" || qr_component_text === " " ||
@@ -698,6 +689,10 @@
                 imageObj.src = response;
             });
         });
+
+        /**
+         * Excel Reader 
+         */
 
         var label_merge = [];
 
