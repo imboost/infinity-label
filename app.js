@@ -25,12 +25,13 @@ app.use(
                 defaultSrc: ["'self'", "'unsafe-inline'"],
                 styleSrc: ["* 'unsafe-inline'"],
                 scriptSrc: ["* 'unsafe-inline' 'unsafe-eval'"],
-                imgSrc: ["'self'", "data:", "'unsafe-inline'"],
+                imgSrc: ["'self'", "data:", "blob:", "'unsafe-inline'", "*"],
                 fontSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "data:", "*"],
                 connectSrc: ["*"],
                 frameSrc: ["'self'"],
                 mediaSrc: ["*"]
-            }
+            },
+            setAllHeaders: true
         }
     })
 );
