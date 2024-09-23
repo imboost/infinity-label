@@ -185,10 +185,23 @@ app.post('/savepng', textParser, async (req, res) => {
     const dataURL = req.body;
     const base64Data = dataURL.replace(/^data:image\/png;base64,/, '');
 
-    // Create a unique filename
-    // const filename = `image-${Date.now()}.png`;
-
     const filePath = path.join("C:", 'InfinityLabel', 'canvas.png');
+
+    fs.writeFile(filePath, base64Data, 'base64', (err) => {
+        if (err) {
+            res.status(500).send('Error saving PNG');
+        } else {
+            res.send('PNG saved successfully');
+        }
+    });
+});
+
+app.post('/savepnglabel/:id', textParser, async (req, res) => {
+    const dataURL = req.body;
+    const base64Data = dataURL.replace(/^data:image\/png;base64,/, '');
+
+    var id = req.params.id;
+    const filePath = path.join("C:", 'InfinityLabel', id + '_' + Date.now() + '_label.png');
 
     fs.writeFile(filePath, base64Data, 'base64', (err) => {
         if (err) {
