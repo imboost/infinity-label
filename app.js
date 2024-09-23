@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const bodyParser = require('body-parser');
 const { networkInterfaces, type } = require('os');
+const { exec } = require('child_process');
 const helmet = require('helmet');
 const QRCode = require('qrcode');
 
@@ -201,13 +202,28 @@ app.post('/savepnglabel/:id', textParser, async (req, res) => {
     const base64Data = dataURL.replace(/^data:image\/png;base64,/, '');
 
     var id = req.params.id;
-    const filePath = path.join("C:", 'InfinityLabel', id + '_' + Date.now() + '_label.png');
+    var fileName = id + '_label.png';
+    const filePath = path.join("C:", 'InfinityLabel', fileName);
 
     fs.writeFile(filePath, base64Data, 'base64', (err) => {
         if (err) {
             res.status(500).send('Error saving PNG');
         } else {
             res.send('PNG saved successfully');
+
+            exec(`C:\\InfinityLabel\\iview467_x64\\i_view64.exe C:\\InfinityLabel\\${fileName} /print`, (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`Error executing the command: ${error.message}`);
+                    return;
+                }
+
+                if (stderr) {
+                    console.error(`Error in the output: ${stderr}`);
+                    return;
+                }
+
+                console.log(`Command executed successfully: ${stdout}`);
+            });
         }
     });
 });
