@@ -20,6 +20,13 @@
     <script src="../konva.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.0/xlsx.full.min.js"></script>
+
+    <!-- <link rel="stylesheet" type="text/css" href="../bwipjs/lib/demo.css"> -->
+    <script type="text/javascript" src="../bwipjs/dist/bwip-js.js"></script>
+    <script type="text/javascript" src="../bwipjs/lib/symdesc.js"></script>
+    <script type="text/javascript" src="../bwipjs/lib/canvas-toblob.js"></script>
+    <script type="text/javascript" src="../bwipjs/lib/filesaver.js"></script>
+    <script type="text/javascript" src="../bwipjs/lib/inconsolata.js"></script>
 </head>
 
 <body class="hold-transition sidebar-mini layout-navbar-fixed layout-fixed">
@@ -37,6 +44,8 @@
                     <a class="nav-link" href="javascript:void(0)" role="button" data-toggle="modal" data-target="#new-qr" title="Add QR"><i class="fa fa-qrcode mr-1"></i> Add QR</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="javascript:void(0)" role="button" data-toggle="modal" data-target="#new-barcode" title="Add Barcode"><i class="fa fa-barcode mr-1"></i> Add Barcode</a>
+                </li>
                     <a class="nav-link" href="javascript:void(0)" role="button" id="btn-excel-load" title="Load Excel"><i class="fa fa-table mr-1"></i> Choose Excel</a>
                 </li>
                 <li class="nav-item">
@@ -143,6 +152,46 @@
         </div>
     </div>
 
+    <div class="modal fade" id="new-barcode" tabindex="-1" aria-labelledby="new-barcode" aria-hidden="true">
+        <div class="modal-dialog" style="display: flex; align-items: center; justify-content: center; height: 100vh;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="mb-0">New Barcode</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 w-100">
+                        <label for="barcode-component-name" class="form-label">Component Name</label>
+                        <input class="form-control width-auto" id="barcode-component-name" autocomplete="off" type="text">
+                    </div>
+                    <div class="form-group mb-3 w-100">
+                        <label>Barcode Type</label>
+                        <select type="text" class="form-control filter-options" id="symbol" style="width: 100%"></select>
+                    </div>
+                    <div class="mb-3 w-100">
+                        <label for="symtext" class="form-label">Bar Text</label>
+                        <input class="form-control width-auto" id="symtext" spellcheck="false" autocomplete="off" type="text">
+                    </div>
+                    <div class="mb-3 w-100">
+                        <label for="symaltx" class="form-label">Alternative Bar Text</label>
+                        <input class="form-control width-auto" id="symaltx" spellcheck="false" autocomplete="off" type="text">
+                    </div>
+                    <div class="mb-3 w-100">
+                        <label for="symopts" class="form-label">Option</label>
+                        <input class="form-control width-auto" id="symopts" spellcheck="false" autocomplete="off" type="text" disabled>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-dismiss="modal">CLOSE</button>
+                    <button type="button" class="btn btn-success" id="btn-add-barcode" data-dismiss="modal" disabled>ADD</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <div class="modal fade bd-example-modal-xl" tabindex="-1" role="dialog" aria-labelledby="modal-data-viewer" aria-hidden="true" id="modal-data-viewer">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
@@ -173,6 +222,32 @@
             const doc = new DOMParser().parseFromString(input, "text/html");
             return doc.documentElement.textContent;
         }
+
+        // Set up the select list of barcode types
+            var opts = [];
+            for (var id in symdesc) {
+                opts.push(symdesc[id]);
+            }
+            console.log('opts',opts);
+            opts.sort(function (a,b) { return a.desc < b.desc ? -1 : 1 });
+            for (var i = 0, l = opts.length; i < l; i++) {
+                var elt = document.createElement('option');
+                elt.textContent = opts[i].desc;
+                elt.value = opts[i].sym;
+                $(document).find('#symbol').append(elt);
+            }
+
+            $(document).on('change', '#symbol', function(){
+                var desc = symdesc[$(this).val()];
+                    if (desc) {
+                        $(document).find('#symtext').val(desc.text);
+                        $(document).find('#symopts').val(desc.opts);
+                    } else {
+                        $(document).find('#symtext').val('');
+                        $(document).find('#symopts').val('');
+                    }
+                    $(document).find('#symaltx').val('');
+            })
 
         var objects = null;
 
@@ -485,6 +560,124 @@
                     }
                     imageObj.src = design[0].label[i].text;
                 }
+            
+                if (design[0].label[i].type === "barcode") {
+                    var x = design[0].label[i].x;
+                    var y = design[0].label[i].y;
+                    console.log(x,y);
+                    var height = Number(design[0].label[i].height);
+                    var width = Number(design[0].label[i].width);
+                    var name = design[0].label[i].name;
+
+                    var imageObj = new Image();
+                    imageObj.src = design[0].label[i].text;
+                    // console.log(imageObj);
+                    imageObj.onload = function () {
+                        var barcode = new Konva.Image({
+                            x: x,
+                            y: y,
+                            image: imageObj,
+                            width: width,
+                            height: height,
+                            draggable: true,
+                            name: name,
+                            type: "barcode"
+                        });
+
+                        layer.add(barcode);
+
+                        barcode.on('dragmove', function () {
+                            var containerPosition = this.getAbsolutePosition();
+                            var stageBox = stage.container().getBoundingClientRect();
+
+                            var areaPosition = {
+                                x: containerPosition.x,
+                                y: containerPosition.y,
+                            };
+
+                            for (let i = 0; i < design[0].label.length; i++) {
+                                if (design[0].label[i].name === this.attrs.name) {
+                                    design[0].label[i].x = areaPosition.x;
+                                    design[0].label[i].y = areaPosition.y;
+                                    break; // Stop once the label is found and updated
+                                }
+                            }
+
+                            var data = JSON.stringify(design);
+
+                            var settings = {
+                                "url": "http://localhost:3000/design_update",
+                                "method": "POST",
+                                "timeout": 0,
+                                "headers": {
+                                    "Content-Type": "text/plain"
+                                },
+                                "data": data,
+                            };
+
+                            $.ajax(settings).done(function (response) {
+                                // console.log(response);
+                            });
+                        });
+
+                        barcode.on('dragend', function () {
+                            var data = JSON.stringify(design);
+
+                            var settings = {
+                                "url": "http://localhost:3000/design_update",
+                                "method": "POST",
+                                "timeout": 0,
+                                "headers": {
+                                    "Content-Type": "text/plain"
+                                },
+                                "data": data
+                            };
+
+                            $.ajax(settings).done(function (response) {
+                                // console.log(response);
+                            });
+                        });
+
+                        barcode.on('transform', function () {
+                            var containerPosition = this.getAbsolutePosition();
+                            var stageBox = stage.container().getBoundingClientRect();
+
+                            var areaPosition = {
+                                x: containerPosition.x,
+                                y: containerPosition.y,
+                            };
+
+                            var width_new = this.width() * (this.scaleX());
+                            var height_new = this.height() * (this.scaleY());
+
+                            for (let i = 0; i < design[0].label.length; i++) {
+                                if (design[0].label[i].name === this.attrs.name) {
+                                    design[0].label[i].width = width_new.toFixed(0);
+                                    design[0].label[i].height = height_new.toFixed(0);
+                                    break; // Stop once the label is found and updated
+                                }
+                            }
+
+                            var data = JSON.stringify(design);
+
+                            var settings = {
+                                "url": "http://localhost:3000/design_update",
+                                "method": "POST",
+                                "timeout": 0,
+                                "headers": {
+                                    "Content-Type": "text/plain"
+                                },
+                                "data": data,
+                            };
+
+                            $.ajax(settings).done(function (response) {
+                                // console.log(response);
+                            });
+                        });
+                    }
+                    
+                }
+            
             }
 
             layer.draw();
@@ -999,6 +1192,233 @@
                 }
             }
         });
+
+
+        /**
+         * Add Barcode
+         */
+
+        var barcode_component_name = "";
+        var barcode_component_text = "";
+        var barcode_component_attribute = "";
+
+        var barcode_component_symbol = "";
+        var barcode_component_symtext = "";
+        var barcode_component_symaltx = "";
+        var barcode_component_symopts = "";
+
+        $(document).on('keyup', '#barcode-component-name', function () {
+            barcode_component_name = $(this).val();
+            barcode_component_name = barcode_component_name.toLowerCase();
+            barcode_component_name = barcode_component_name.replace(/ /g, '_');
+            barcode_component_attribute = barcode_component_name.replace(/ /g, '_');
+
+            // $(this).val(barcode_component_name);
+            // $(document).find('#qr-component-attribute').val(barcode_component_attribute);
+
+            // barcode_component_text = $(document).find('#qr-component-text').val();
+            // barcode_component_attribute = $(document).find('#qr-component-attribute').val();
+
+            if (barcode_component_name === "" || barcode_component_name === " " 
+                // ||barcode_component_text === "" || barcode_component_text === " " ||
+                // barcode_component_attribute === "" || barcode_component_attribute === ""
+            ) {
+                $(document).find('#btn-add-barcode').attr('disabled', 'disabled');
+            } else {
+                $(document).find('#btn-add-barcode').removeAttr('disabled');
+            }
+        });
+
+        // window.addEventListener('load', function() {
+        //     var lastSymbol, lastBarText, lastAltText, lastOptions, lastRotate, lastScaleX, lastScaleY,
+        //         lastRenderAs = 'render-canvas';
+        //     try {
+        //         lastSymbol  = localStorage.getItem('bwipjsLastSymbol');
+        //         lastBarText = localStorage.getItem('bwipjsLastBarText');
+        //         lastAltText = localStorage.getItem('bwipjsLastAltText');
+        //         lastOptions = localStorage.getItem('bwipjsLastOptions');
+        //         // lastRotate  = localStorage.getItem('bwipjsLastRotate');
+        //         // lastScaleX  = +localStorage.getItem('bwipjsLastScaleX');
+        //         // lastScaleY  = +localStorage.getItem('bwipjsLastScaleY');
+        //         // lastRenderAs = localStorage.getItem('bwipjsLastRenderAs');
+        //     } catch (e) {
+        //     }
+
+        //     // Set up the select list of barcode types
+        //     var sel = document.getElementById('symbol');
+        //     var opts = [];
+        //     for (var id in symdesc) {
+        //         opts.push(symdesc[id]);
+        //     }
+        //     console.log('opts',opts);
+        //     opts.sort(function (a,b) { return a.desc < b.desc ? -1 : 1 });
+        //     for (var i = 0, l = opts.length; i < l; i++) {
+        //         var elt = document.createElement('option');
+        //         elt.textContent = opts[i].desc;
+        //         elt.value = opts[i].sym;
+        //         sel.appendChild(elt);
+        //     }
+
+        //     sel.addEventListener('change', function(ev) {
+        //             var desc = symdesc[sel.value];
+        //             if (desc) {
+        //                 document.getElementById('symtext').value = desc.text;
+        //                 document.getElementById('symopts').value = desc.opts;
+        //             } else {
+        //                 document.getElementById('symtext').value = '';
+        //                 document.getElementById('symopts').value = '';
+        //             }
+        //             document.getElementById('symaltx').value = '';
+        //             // document.getElementById('saveas').style.visibility = 'hidden';
+        //             // document.getElementById('stats').textContent = '';
+        //             // document.getElementById('canvas').style.display = 'none';
+        //             // document.getElementById('svgdiv').style.display = 'none';
+        //             // document.getElementById('output').textContent = '';
+        //         });
+
+        //     console.log('last symbol', lastSymbol);
+        //     if (lastSymbol) {
+        //         sel.value = lastSymbol;
+        //     } else {
+        //         sel.selectedIndex = 0;
+        //     }
+        //     var evt = document.createEvent("HTMLEvents");
+        //     evt.initEvent("change", false, true);
+        //     sel.dispatchEvent(evt);
+
+        //     if (lastBarText) {
+        //         document.getElementById('symtext').value = lastBarText;
+        //         document.getElementById('symaltx').value = lastAltText;
+        //         document.getElementById('symopts').value = lastOptions;
+        //     }
+        //     // if (lastRenderAs) {
+        //     //     document.getElementById(lastRenderAs).checked = true;
+        //     // }
+        //     // if (lastScaleX && lastScaleY) {
+        //     //     document.getElementById('scaleX').value = lastScaleX;
+        //     //     document.getElementById('scaleY').value = lastScaleY;
+        //     // }
+        //     // if (lastRotate) {
+        //     //     document.getElementById('rotate' + lastRotate).checked = true;
+        //     // }
+
+        //     // document.getElementById('scaleX').addEventListener('change', function(ev) {
+        //     //         document.getElementById('scaleY').value = ev.target.value;
+        //     //     });
+        //     // document.getElementById('render').addEventListener('click', render);
+        //     // document.getElementById('saveas').style.visibility = 'hidden';
+
+        //     // Allow Enter to render
+        //     // document.getElementById('params').addEventListener('keypress', function(ev) {
+        //     //     if (ev.which == 13) {
+        //     //         render();
+        //     //         ev.stopPropagation();
+        //     //         ev.preventDefault();
+        //     //         return false;
+        //     //     }
+        //     // });
+
+        //     // document.getElementById('versions').textContent =
+        //     //             'bwip-js ' + bwipjs.BWIPJS_VERSION + ' / BWIPP ' + bwipjs.BWIPP_VERSION;
+
+        //     // A reasonable match to OCR-B metrics.
+        //     bwipjs.loadFont("Inconsolata", 95, 105, Inconsolata);
+        // });
+
+        $(document).on('click', '#btn-add-barcode', function () {
+            // render();
+            barcode_component_symbol = symdesc[document.getElementById('symbol').value];
+            barcode_component_symtext = $(document).find('#symtext').val();
+            // document.getElementById('symtext').value.trim();
+            barcode_component_symaltx = $(document).find('#symaltx').val();
+            // document.getElementById('symaltx').value.trim();
+            // barcode_component_symopts = document.getElementById('symopts').value.trim();
+
+            
+            // qr_component_text = $(document).find('#qr-component-text').val();
+            // qr_component_attribute = $(document).find('#qr-component-attribute').val();
+            // console.log(barcode_component_symbol, barcode_component_symtext, barcode_component_symaltx, barcode_component_symopts);
+            var component = {
+                "name": barcode_component_name,
+                "text": barcode_component_symtext,
+                "attribute": barcode_component_attribute,
+                "type": "barcode",
+                "type_code": barcode_component_symbol.sym,
+                "x": centerX,
+                "y": centerY,
+                "width": 100,
+                "height": 100
+            }
+
+            console.log('isi', component);
+
+            var data = JSON.stringify(component);
+
+            var settings = {
+                "url": "http://localhost:3000/barcode",
+                "method": "POST",
+                "timeout": 0,
+                "headers": {
+                    "Content-Type": "text/plain"
+                },
+                "data": data,
+            };
+            console.log('insert0', design[0].label);
+            // $.ajax(settings).done(function (response) {
+            //     console.log('we did it!', response);
+            // });
+            $.ajax(settings).done(function (response) {
+                console.log('we did it!', response);
+                var barcode_text = response;
+                console.log('insert1', design[0].label);
+                var component_insert = {
+                    "name": barcode_component_name,
+                    "text": 'data:image/png;base64,'+barcode_text,
+                    "attribute": barcode_component_attribute,
+                    "type": "barcode",
+                    "type_code": barcode_component_symbol.sym,
+                    "x": centerX,
+                    "y": centerY,
+                    "width": 100,
+                    "height": 100
+                }
+                design[0].label.push(component_insert);
+                console.log('insert', component_insert, design[0].label);
+
+                var data = JSON.stringify(design);
+
+                var settings = {
+                    "url": "http://localhost:3000/design_update",
+                    "method": "POST",
+                    "timeout": 0,
+                    "headers": {
+                        "Content-Type": "text/plain"
+                    },
+                    "data": data,
+                };
+
+                $.ajax(settings).done(function (response) {
+                    window.location.reload();
+                });
+                
+                // var imageObj = new Image();
+                // // imageObj.src = response;
+                // imageObj.onload = function () {
+                //     var barcode = new Konva.Image({
+                //         x: centerX,
+                //         y: centerY,
+                //         image: imageObj,
+                //         width: 100,
+                //         height: 100,
+                //     });
+
+                //     layer.add(barcode);
+                // };
+                // imageObj.src = response;
+            });
+        
+        });
+
     </script>
 </body>
 

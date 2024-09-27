@@ -7,6 +7,7 @@ const { networkInterfaces, type } = require('os');
 const { exec } = require('child_process');
 const helmet = require('helmet');
 const QRCode = require('qrcode');
+const bwipjs = require('bwip-js');
 
 const nets = networkInterfaces();
 const results = Object.create(null);
@@ -179,8 +180,35 @@ app.post('/qrgen', textParser, async (req, res) => {
     var info = JSON.parse(component);
 
     const qrCodeImage = await QRCode.toDataURL(info.text);
-
+    // console.log('qr',info.text, qrCodeImage);
     res.status(200).json(qrCodeImage);
+});
+
+app.post('/barcode', textParser, async (req, res) => {
+    const component = req.body;
+
+    var info = JSON.parse(component);
+    // console.log('info',info);
+
+    const barcode = bwipjs.toBuffer({
+        bcid:        info.type_code,       // Barcode type
+        text:        info.text,       // Text to encode
+        scale:       3,               // 3x scaling factor
+        height:      10,              // Bar height, in millimeters
+        includetext: true,            // Show human-readable text
+        textxalign:  'center',        // Always good to set this
+    }, function (err, png) {
+        if (err) {
+            // `err` may be a string or Error object
+        } else {
+            res.status(200).json(png.toString('base64'));
+            // console.log('pngNYA', png);
+            // `png` is a Buffer
+            // png.length           : PNG file length
+            // png.readUInt32BE(16) : PNG image width
+            // png.readUInt32BE(20) : PNG image height
+        }
+    });
 });
 
 app.post('/savepng', textParser, async (req, res) => {
