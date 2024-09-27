@@ -564,19 +564,20 @@
                 if (design[0].label[i].type === "barcode") {
                     var x = design[0].label[i].x;
                     var y = design[0].label[i].y;
-                    console.log(x,y);
+                    console.log(design[0].label[i].text);
+                    console.log(" ");
                     var height = Number(design[0].label[i].height);
                     var width = Number(design[0].label[i].width);
                     var name = design[0].label[i].name;
 
-                    var imageObj = new Image();
-                    imageObj.src = design[0].label[i].text;
-                    // console.log(imageObj);
-                    imageObj.onload = function () {
+                    var barcodeImg = new Image();
+                    barcodeImg.src = design[0].label[i].text;
+                    // console.log(barcodeImg);
+                    barcodeImg.onload = function () {
                         var barcode = new Konva.Image({
                             x: x,
                             y: y,
-                            image: imageObj,
+                            image: barcodeImg,
                             width: width,
                             height: height,
                             draggable: true,
