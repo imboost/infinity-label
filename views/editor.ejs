@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="../plugins/jsgrid/jsgrid-theme.min.css" />
     <link rel="stylesheet" href="../adminlte/css/adminlte.min.css">
     <link rel="stylesheet" href="../fontaswome/css/all.min.css">
+    <link rel="stylesheet" href="../plugins/select2/css/select2.min.css">
+    <link rel="stylesheet" href="../plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
     <script src="../konva.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.0/xlsx.full.min.js"></script>
@@ -168,14 +170,14 @@
                     </div>
                     <div class="form-group mb-3 w-100">
                         <label>Barcode Type</label>
-                        <select type="text" class="form-control filter-options" id="symbol" style="width: 100%"></select>
+                        <select type="text" class="form-control" id="symbol" style="width: 100%"></select>
                     </div>
                     <div class="mb-3 w-100">
-                        <label for="symtext" class="form-label">Bar Text</label>
+                        <label for="symtext" class="form-label">Display Value</label>
                         <input class="form-control width-auto" id="symtext" spellcheck="false" autocomplete="off" type="text">
                     </div>
                     <div class="mb-3 w-100">
-                        <label for="symaltx" class="form-label">Alternative Bar Text</label>
+                        <label for="symaltx" class="form-label">Display Value Caption</label>
                         <input class="form-control width-auto" id="symaltx" spellcheck="false" autocomplete="off" type="text">
                     </div>
                     <div class="mb-3 w-100">
@@ -215,6 +217,7 @@
     <script src="../plugins/toastr/toastr.min.js"></script>
     <script src="../plugins/jsgrid/jsgrid.min.js"></script>
     <script src="../adminlte/js/adminlte.min.js"></script>
+    <script src="../plugins/select2/js/select2.full.min.js"></script>
 
     <script>
         // HTML Decoder
@@ -239,7 +242,7 @@
         $(document).on('change', '#symbol', function () {
             var desc = symdesc[$(this).val()];
             if (desc) {
-                $(document).find('#symtext').val(desc.text);
+                $(document).find('#symtext').val('');
                 $(document).find('#symopts').val(desc.opts);
             } else {
                 $(document).find('#symtext').val('');
@@ -1191,6 +1194,12 @@
          * Add Barcode
          */
 
+        /**
+         * Enable Select2
+         */
+            $('#symbol').select2({
+            theme: 'bootstrap4'
+        });
         var barcode_component_name = "";
         var barcode_component_text = "";
         var barcode_component_attribute = "";
@@ -1205,6 +1214,8 @@
             barcode_component_name = barcode_component_name.toLowerCase();
             barcode_component_name = barcode_component_name.replace(/ /g, '_');
             barcode_component_attribute = barcode_component_name.replace(/ /g, '_');
+
+            $(this).val(barcode_component_name);
 
             if (barcode_component_name === "" || barcode_component_name === " "
                 // ||barcode_component_text === "" || barcode_component_text === " " ||
