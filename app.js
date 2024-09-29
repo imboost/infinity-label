@@ -189,8 +189,6 @@ app.post('/barcode', textParser, async (req, res) => {
 
     var info = JSON.parse(component);
 
-    console.log(info);
-
     bwipjs.toBuffer({
         bcid: info.type_code, // Barcode type
         text: info.text, // Text to encode
