@@ -201,6 +201,7 @@ app.post('/barcode', textParser, async (req, res) => {
     }, function (err, png) {
         if (err) {
             console.log(err);
+            res.status(500).send('Error Format Code!');
         } else {
             res.status(200).json(png.toString('base64'));
             // `png` is a Buffer

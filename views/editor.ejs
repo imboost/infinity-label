@@ -1496,8 +1496,14 @@
                 "data": data,
             };
 
-            $.ajax(settings).done(function (response) {
+            $.ajax(settings)
+            .done(function (response) {
                 var barcode_text = response;
+
+                console.log('respons', response.status);
+                if (response.status === 500) {
+                    toastr.error('Provide Correct Code Format!');
+                }
 
                 var component_insert = {
                     "name": barcode_component_name,
@@ -1527,7 +1533,14 @@
                 $.ajax(settings).done(function (response) {
                     window.location.reload();
                 });
+            })
+            .fail(function (res) {
+                // Cek apakah statusnya 500
+                if (res.status === 500) {
+                    toastr.error('Provide Correct Code Format!');
+                }
             });
+        
         });
     </script>
 </body>
