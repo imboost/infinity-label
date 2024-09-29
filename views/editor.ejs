@@ -20,6 +20,8 @@
     <link rel="stylesheet" href="../plugins/select2/css/select2.min.css">
     <link rel="stylesheet" href="../plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
     <script src="../konva.js"></script>
+    <script src="../nowdb.js"></script>
+    <script src="../helper_json.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.0/xlsx.full.min.js"></script>
 
@@ -1042,6 +1044,7 @@
                     $("#data-viewer").jsGrid({
                         width: "100%",
 
+                        filtering: true,
                         sorting: true,
                         paging: true,
                         pageSize: 10,
@@ -1054,6 +1057,42 @@
                             data_display = args.item.__rowNum__ - 1;
                             data_to_design_single(args.item.__rowNum__ - 1);
                             $(document).find('#modal-data-viewer').modal('hide');
+                        },
+
+                        controller: {
+                            loadData: function (filter) {
+                                var search_fields = "";
+                                var search_query = "";
+                                var search_value = "";
+                                var search_blank = true;
+                                for (const key in filter) {
+                                    if (filter.hasOwnProperty(key)) {
+                                        search_fields = search_fields + key + "OR";
+                                        search_query = search_query + "containsOR";
+                                        var search_value_temp = "";
+                                        if (filter[key] === "") {
+                                            // value cant contain ~
+                                            search_value_temp = "~";
+                                        } else {
+                                            search_value_temp = filter[key];
+                                            search_blank = false;
+                                        }
+                                        search_value = search_value + search_value_temp + "OR";
+                                    }
+                                }
+
+                                search_fields = search_fields.slice(0, -2);
+                                search_query = search_query.slice(0, -2);
+                                search_value = search_value.slice(0, -2);
+
+                                var search_result = json_filter(excel_data, search_fields, search_query, search_value);
+
+                                if (search_blank == true) {
+                                    return excel_data;
+                                } else {
+                                    return search_result;
+                                }
+                            }
                         }
                     });
 
