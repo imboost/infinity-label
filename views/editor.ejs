@@ -154,11 +154,11 @@
         </div>
     </div>
 
-    <div class="modal fade" id="new-barcode" tabindex="-1" aria-labelledby="new-barcode" aria-hidden="true">
+    <div class="modal fade" id="new-barcode" aria-labelledby="new-barcode" aria-hidden="true">
         <div class="modal-dialog" style="display: flex; align-items: center; justify-content: center; height: 100vh;">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="mb-0">New Barcode</h5>
+                    <h5 class="mb-0">New 2D Code</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -243,6 +243,8 @@
         }
 
         $(document).on('change', '#symbol', function () {
+            console.log($(this).val());
+
             var desc = symdesc[$(this).val()];
             if (desc) {
                 $(document).find('#symtext').val('');
