@@ -54,9 +54,6 @@
                     <a class="nav-link" href="javascript:void(0)" role="button" id="btn-print" title="Print All"><i class="fa fa-print mr-1"></i> Print All</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="javascript:void(0)" role="button" id="btn-print-one" title="Print" style="display: none;"><i class="fa fa-print mr-1"></i></a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" href="javascript:void(0)" role="button" id="btn-data-prev" title="Previous Data" style="display: none;"><i class="fa fa-arrow-left mr-1"></i></a>
                 </li>
                 <li class="nav-item">
@@ -68,6 +65,9 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="javascript:void(0)" role="button" id="btn-data-next" title="Next Data" style="display: none;"><i class="fa fa-arrow-right mr-1"></i></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="javascript:void(0)" role="button" id="btn-print-one" title="Print" style="display: none;"><i class="fa fa-print mr-1"></i></a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="javascript:void(0)" role="button" id="btn-delete-component" title="Delete component" style="display: none;"><i class="fa-solid fa-trash text-danger"></i></a>
@@ -1056,6 +1056,7 @@
 
                     $(document).find('#btn-data-prev').show();
                     $(document).find('#btn-data-next').show();
+                    $(document).find('#btn-print-one').show();
                     $(document).find('#btn-data-counter').show();
                     $(document).find('#data-counter-running').html(0);
                     $(document).find('#data-counter-total').html(label_merge.length);
@@ -1091,6 +1092,10 @@
             } else {
                 toastr.error('Data reach end!');
             }
+        });
+
+        $(document).on('click', '#btn-print-one', function () {
+            data_to_print_one(data_display);
         });
 
         function data_to_design_single(i) {
@@ -1323,6 +1328,115 @@
                         data_to_design(i);
                     }
                 });
+            }, 1000);
+        }
+
+        function data_to_print_one(i) {
+            layer.clear();
+
+            var design = JSON.parse(decodedDesign.slice(1, -1));
+            var width = Number(design[0].file.width);
+            var height = Number(design[0].file.height);
+
+            let centerX = stage.width() / 2;
+            let centerY = stage.height() / 2;
+
+            var Label = new Konva.Rect({
+                x: centerX - (parseFloat(width) * 3.7795275591),
+                y: centerY - (parseFloat(height) * 3.7795275591),
+                width: parseFloat(width) * 3.7795275591, //konversi mm ke px
+                height: parseFloat(height) * 3.7795275591,
+                fill: 'white',
+                stroke: 'lightgray',
+                strokeWidth: 1,
+                name: 'base_layout'
+            });
+
+            layer.add(Label);
+
+            layer.draw();
+
+            for (var j = 0; j < label_merge[i].length; j++) {
+                if (label_merge[i][j].type === "text") {
+                    var text = new Konva.Text({
+                        x: label_merge[i][j].x,
+                        y: label_merge[i][j].y,
+                        text: label_merge[i][j].text,
+                        fontSize: label_merge[i][j].fontSize,
+                        draggable: false,
+                        name: label_merge[i][j].name,
+                        type: "text"
+                    });
+
+                    layer.add(text);
+                }
+
+                if (label_merge[i][j].type === "qr") {
+                    var x = label_merge[i][j].x;
+                    var y = label_merge[i][j].y;
+                    var height = Number(label_merge[i][j].height);
+                    var width = Number(label_merge[i][j].width);
+                    var name = label_merge[i][j].name;
+
+                    var imageObj = new Image();
+                    imageObj.src = label_merge[i][j].text;
+
+                    var qr = new Konva.Image({
+                        x: x,
+                        y: y,
+                        image: imageObj,
+                        width: width,
+                        height: height,
+                        draggable: true,
+                        name: name,
+                        type: "qr"
+                    });
+
+                    layer.add(qr);
+                }
+
+                if (label_merge[i][j].type === "barcode") {
+                    var x = label_merge[i][j].x;
+                    var y = label_merge[i][j].y;
+                    var height = Number(label_merge[i][j].height);
+                    var width = Number(label_merge[i][j].width);
+                    var name = label_merge[i][j].name;
+
+                    var imageObj = new Image();
+                    imageObj.src = label_merge[i][j].text;
+
+                    var qr = new Konva.Image({
+                        x: x,
+                        y: y,
+                        image: imageObj,
+                        width: width,
+                        height: height,
+                        draggable: true,
+                        name: name,
+                        type: "barcode"
+                    });
+
+                    layer.add(qr);
+                }
+            }
+
+            setTimeout(function () {
+                let dataURL = layer.toDataURL({
+                    x: centerX - (parseFloat(width) * 3.7795275591),
+                    y: centerY - (parseFloat(height) * 3.7795275591),
+                    width: parseFloat(width) * 3.7795275591,
+                    height: parseFloat(height) * 3.7795275591
+                });
+
+                var settings = {
+                    "url": "http://localhost:3000/savepnglabel/" + i,
+                    "method": "POST",
+                    "timeout": 0,
+                    "headers": {
+                        "Content-Type": "text/plain"
+                    },
+                    "data": dataURL
+                };
             }, 1000);
         }
 
