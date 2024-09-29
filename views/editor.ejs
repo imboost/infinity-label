@@ -243,8 +243,6 @@
         }
 
         $(document).on('change', '#symbol', function () {
-            console.log($(this).val());
-
             var desc = symdesc[$(this).val()];
             if (desc) {
                 $(document).find('#symtext').val('');
@@ -469,7 +467,7 @@
 
                     var imageObj = new Image();
                     imageObj.src = design[0].label[i].text;
-                    // imageObj.onload = function () {
+                    
                     var qr = new Konva.Image({
                         x: x,
                         y: y,
@@ -571,7 +569,6 @@
                             // console.log(response);
                         });
                     });
-                    // }
                 }
 
                 if (design[0].label[i].type === "barcode") {
@@ -1031,8 +1028,6 @@
         });
 
         function data_to_design(i) {
-            console.log(i);
-
             layer.clear();
 
             var design = JSON.parse(decodedDesign.slice(1, -1));
@@ -1054,6 +1049,7 @@
             });
 
             layer.add(Label);
+
             layer.draw();
 
             for (var j = 0; j < label_merge[i].length; j++) {
@@ -1116,8 +1112,6 @@
                 };
 
                 $.ajax(settings).done(function (response) {
-                    console.log(response);
-
                     i = i + 1;
                     if (i < label_merge.length - 1) {
                         data_to_design(i);
@@ -1264,8 +1258,6 @@
             $.ajax(settings).done(function (response) {
                 var barcode_text = response;
 
-                console.log(barcode_text);
-
                 var component_insert = {
                     "name": barcode_component_name,
                     "text": 'data:image/png;base64,' + barcode_text,
@@ -1278,8 +1270,6 @@
                     "height": 100
                 }
                 design[0].label.push(component_insert);
-
-                console.log(design[0].label);
 
                 var data = JSON.stringify(design);
 
