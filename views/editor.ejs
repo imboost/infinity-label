@@ -42,11 +42,11 @@
                 <li class="nav-item">
                     <a class="nav-link" href="javascript:void(0)" role="button" data-toggle="modal" data-target="#new-text" title="Add Text"><i class=" fa fa-font mr-1"></i> Add Label</a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link" href="javascript:void(0)" role="button" data-toggle="modal" data-target="#new-qr" title="Add QR"><i class="fa fa-qrcode mr-1"></i> Add QR</a>
-                </li>
+                </li> -->
                 <li class="nav-item">
-                    <a class="nav-link" href="javascript:void(0)" role="button" data-toggle="modal" data-target="#new-barcode" title="Add Barcode"><i class="fa fa-barcode mr-1"></i> Add Barcode</a>
+                    <a class="nav-link" href="javascript:void(0)" role="button" data-toggle="modal" data-target="#new-barcode" title="Add Barcode"><i class="fa fa-barcode mr-1"></i> Add 2D Code</a>
                 </li>
                 <a class="nav-link" href="javascript:void(0)" role="button" id="btn-excel-load" title="Load Excel"><i class="fa fa-table mr-1"></i> Choose Excel</a>
                 </li>
@@ -227,16 +227,19 @@
         }
 
         // Set up the select list of barcode types
+        $(document).find('#symbol').html('');
+
         var opts = [];
         for (var id in symdesc) {
             opts.push(symdesc[id]);
         }
-        opts.sort(function (a, b) { return a.desc < b.desc ? -1 : 1 });
+
+        opts.sort(function (a, b) {
+            return a.desc < b.desc ? -1 : 1
+        });
+
         for (var i = 0, l = opts.length; i < l; i++) {
-            var elt = document.createElement('option');
-            elt.textContent = opts[i].desc;
-            elt.value = opts[i].sym;
-            $(document).find('#symbol').append(elt);
+            $(document).find('#symbol').append(`<option value="` + opts[i].sym + `">` + opts[i].desc + `</option>`);
         }
 
         $(document).on('change', '#symbol', function () {
@@ -249,11 +252,17 @@
                 $(document).find('#symopts').val('');
             }
             $(document).find('#symaltx').val('');
-        })
+        });
 
-        var objects = null;
+        /**
+         * Enable Select2
+         */
+        $('#symbol').select2({
+            theme: 'bootstrap4'
+        });
 
         // Layout configuration from file read expressjs
+        var objects = null;
         var design_string = "<%= design %>";
 
         var decodedDesign = htmlDecode(design_string);
@@ -1194,12 +1203,6 @@
          * Add Barcode
          */
 
-        /**
-         * Enable Select2
-         */
-            $('#symbol').select2({
-            theme: 'bootstrap4'
-        });
         var barcode_component_name = "";
         var barcode_component_text = "";
         var barcode_component_attribute = "";
