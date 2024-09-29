@@ -476,7 +476,7 @@
 
                     var imageObj = new Image();
                     imageObj.src = design[0].label[i].text;
-                    
+
                     var qr = new Konva.Image({
                         x: x,
                         y: y,
@@ -988,6 +988,30 @@
 
                                 label_merge[k][l].text = qr;
                             }
+
+                            if (label_merge[k][l].type === "barcode") {
+                                var iter_k = k;
+                                var before_generate = label_merge[k][l];
+                                var to_generate = JSON.stringify(label_merge[k][l]);
+
+                                var settings = {
+                                    "url": "http://localhost:3000/barcode",
+                                    "method": "POST",
+                                    "timeout": 0,
+                                    "headers": {
+                                        "Content-Type": "text/plain"
+                                    },
+                                    "data": to_generate,
+                                    "async": false
+                                };
+
+                                var barcode = "";
+                                $.ajax(settings).done(function (response) {
+                                    barcode = response;
+                                });
+
+                                label_merge[k][l].text = 'data:image/png;base64,' + barcode;
+                            }
                         }
                     }
                 }
@@ -1084,21 +1108,44 @@
                     var name = label_merge[i][j].name;
 
                     var imageObj = new Image();
-                    imageObj.onload = function () {
-                        var qr = new Konva.Image({
-                            x: x,
-                            y: y,
-                            image: imageObj,
-                            width: width,
-                            height: height,
-                            draggable: true,
-                            name: name,
-                            type: "qr"
-                        });
-
-                        layer.add(qr);
-                    };
                     imageObj.src = label_merge[i][j].text;
+
+                    var qr = new Konva.Image({
+                        x: x,
+                        y: y,
+                        image: imageObj,
+                        width: width,
+                        height: height,
+                        draggable: true,
+                        name: name,
+                        type: "qr"
+                    });
+
+                    layer.add(qr);
+                }
+
+                if (label_merge[i][j].type === "barcode") {
+                    var x = label_merge[i][j].x;
+                    var y = label_merge[i][j].y;
+                    var height = Number(label_merge[i][j].height);
+                    var width = Number(label_merge[i][j].width);
+                    var name = label_merge[i][j].name;
+
+                    var imageObj = new Image();
+                    imageObj.src = label_merge[i][j].text;
+
+                    var qr = new Konva.Image({
+                        x: x,
+                        y: y,
+                        image: imageObj,
+                        width: width,
+                        height: height,
+                        draggable: true,
+                        name: name,
+                        type: "barcode"
+                    });
+
+                    layer.add(qr);
                 }
             }
 
