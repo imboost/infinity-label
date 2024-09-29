@@ -4,13 +4,17 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 module.exports = {
   packagerConfig: {
     asar: true,
-    icon: "public/adminlte/img/logo.png"
+    icon: "public/adminlte/img/logo.ico"
   },
   rebuildConfig: {},
   makers: [
     {
-      name: '@electron-forge/maker-squirrel',
-      config: {},
+      name: '@electron-forge/maker-wix',
+      config: {
+        "ui": {
+          "chooseDirectory": true
+        }
+      }
     },
     {
       name: '@electron-forge/maker-zip',
