@@ -3,6 +3,7 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
 module.exports = {
   packagerConfig: {
+    name: 'Infinty Label',
     asar: true,
     icon: "public/adminlte/img/logo.ico"
   },
@@ -11,9 +12,15 @@ module.exports = {
     {
       name: '@electron-forge/maker-wix',
       config: {
-        "ui": {
-          "chooseDirectory": true
-        }
+        manufacturer: 'CV Infinity Karya Bersama',
+        icon: "public/adminlte/img/logo.ico",
+        name: 'Infinty Label',
+        description: 'Dynamic Printer Label Designer',
+        // Configure installer User Interface
+        ui: {
+          enabled: true,
+          chooseDirectory: false
+        },
       }
     },
     {

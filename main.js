@@ -11,6 +11,7 @@ function createWindow() {
     win = new BrowserWindow({
         width: 1080,
         height: 600,
+        resizable: false,
         title: "Infinity Label",
         icon: 'public/adminlte/img/logo.png',
         webPreferences: {
@@ -22,13 +23,15 @@ function createWindow() {
 
     win.loadURL("http://localhost:3000");
 
+    win.maximize();
+
     // Emitted when the window is closed.
     win.on('closed', () => {
         win = null;
     });
 
     // DevTools.
-    // win.webContents.openDevTools()
+    // win.webContents.openDevTools();
 }
 
 app.on('ready', createWindow);
