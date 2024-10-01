@@ -3,8 +3,8 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
 module.exports = {
   packagerConfig: {
-    name: 'Infinity Label',
     asar: true,
+    name: 'Infinity Label',
     icon: "public/adminlte/img/logo.ico"
   },
   rebuildConfig: {},
@@ -16,11 +16,10 @@ module.exports = {
         icon: "public/adminlte/img/logo.ico",
         name: 'Infinity Label',
         description: 'Dynamic Printer Label Designer by CV Infinity Karya Bersama',
-        // Configure installer User Interface
         ui: {
           enabled: true,
           chooseDirectory: false
-        },
+        }
       }
     },
     {
