@@ -3,9 +3,11 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
 module.exports = {
   packagerConfig: {
-    asar: true,
     name: 'Infinity Label',
-    icon: "public/adminlte/img/logo.ico"
+    icon: "public/adminlte/img/logo.ico",
+    asar: {
+      unpack: '**/public/**',  // Unpacks the 'sourceDir' from the .asar archive
+    },
   },
   rebuildConfig: {},
   makers: [

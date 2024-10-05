@@ -55,27 +55,27 @@ app.get('/', (req, res) => {
 
     // Check Directory
     if (fs.existsSync(path.join('C:', 'InfinityLabel'))) { // Exist
-        const sourceDir = path.join(__dirname, "public", "installer", "iview467_x64");
+        const sourceDir = path.join(__dirname + ".unpacked", "public", "installer", "iview467_x64");
         const destinationDir = path.join("C:", "InfinityLabel", "iview467_x64");
 
         // Check if the source directory exists
         if (!fs.existsSync(sourceDir)) {
             return res.status(500).json({
                 type: 0,
-                message: 'Error Process!'
+                message: sourceDir
             });
         }
 
         fs.cpSync(sourceDir, destinationDir, { recursive: true });
     } else { // Not Exist
-        const sourceDir = path.join(__dirname, "public", "installer", "iview467_x64");
+        const sourceDir = path.join(__dirname + ".unpacked", "public", "installer", "iview467_x64");
         const destinationDir = path.join("C:", "InfinityLabel", "iview467_x64");
 
         // Check if the source directory exists
         if (!fs.existsSync(sourceDir)) {
             return res.status(500).json({
                 type: 0,
-                message: 'Error Process!'
+                message: sourceDir
             });
         }
 
