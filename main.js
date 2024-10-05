@@ -11,7 +11,7 @@ function createWindow() {
     win = new BrowserWindow({
         width: 1080,
         height: 600,
-        resizable: false,
+        resizable: true,
         title: "Infinity Label",
         icon: 'public/adminlte/img/logo.png',
         webPreferences: {
